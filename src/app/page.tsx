@@ -111,17 +111,39 @@ export default function EntryForm() {
           </View>
           
           <ThemedText style={styles.successText}>
-            Thank you for participating in the Santos exclusive event draw. 
-            Your entry has been successfully registered.
+            Thanks for entering the Santos draw
           </ThemedText>
           
-          <View style={styles.infoContainer}>
-            <ThemedText style={styles.infoText}>
-              Winners will be announced at the end of the event.
-            </ThemedText>
-            <ThemedText style={styles.infoText}>
-              If selected, you'll be contacted via the phone number you provided.
-            </ThemedText>
+          <View style={styles.successDetails}>
+            <View style={styles.successDetailItem}>
+              <View style={styles.iconCircle}>
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M13.3334 4L6.00002 11.3333L2.66669 8" stroke="#0a7ea4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </View>
+              <ThemedText style={styles.successDetailText}>Your entry has been registered</ThemedText>
+            </View>
+            
+            <View style={styles.successDetailItem}>
+              <View style={styles.iconCircle}>
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M8 4V8L10.6667 9.33333" stroke="#0a7ea4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <circle cx="8" cy="8" r="6" stroke="#0a7ea4" strokeWidth="2"/>
+                </svg>
+              </View>
+              <ThemedText style={styles.successDetailText}>Winners announced after event</ThemedText>
+            </View>
+            
+            <View style={styles.successDetailItem}>
+              <View style={styles.iconCircle}>
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M13.3333 11.2V13.2C13.3333 13.4652 13.228 13.7196 13.0404 13.9071C12.8529 14.0946 12.5985 14.2 12.3333 14.2H3.66667C3.40145 14.2 3.14709 14.0946 2.95956 13.9071C2.77202 13.7196 2.66667 13.4652 2.66667 13.2V11.2" stroke="#0a7ea4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M5.66667 7.86667L8 10.2L10.3333 7.86667" stroke="#0a7ea4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M8 10.2V2.86667" stroke="#0a7ea4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </View>
+              <ThemedText style={styles.successDetailText}>We'll contact you if you win</ThemedText>
+            </View>
           </View>
           
           <TouchableOpacity
@@ -248,28 +270,35 @@ const styles = StyleSheet.create({
     fontSize: 18,
     marginBottom: 30,
     textAlign: 'center',
-    lineHeight: 1.5,
     letterSpacing: 0.5,
     color: '#ffffff',
   },
-  infoContainer: {
-    backgroundColor: 'rgba(10, 126, 164, 0.1)',
-    borderLeft: '3px solid #0a7ea4',
-    padding: 20,
-    marginBottom: 40,
-    borderRadius: 0,
+  successDetails: {
     width: '100%',
-    maxWidth: '100%',
+    marginBottom: 40,
   },
-  infoText: {
+  successDetailItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 15,
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    backgroundColor: 'rgba(10, 126, 164, 0.08)',
+  },
+  iconCircle: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: 'rgba(10, 126, 164, 0.1)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+  successDetailText: {
     fontSize: 14,
-    lineHeight: 1.8,
     color: '#9BA1A6',
     letterSpacing: 0.5,
-    marginBottom: 8,
-    textAlign: 'left',
-    width: '100%',
-    wordWrap: 'break-word',
+    flex: 1,
   },
   homeButton: {
     backgroundColor: 'transparent',
