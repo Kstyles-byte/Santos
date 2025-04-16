@@ -1,0 +1,43 @@
+// This is your main Prisma schema file
+// Duplicate of the one in prisma/schema.prisma for better Vercel compatibility
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Entry {
+  id            Int       @id @default(autoincrement())
+  fullName      String
+  phoneNumber   String
+  timestamp     DateTime  @default(now())
+  isWinner      Boolean   @default(false)
+  drawTimestamp DateTime?
+  eventId       Int?
+  event         Event?    @relation(fields: [eventId], references: [id])
+
+  @@index([eventId])
+}
+
+model Event {
+  id        Int      @id @default(autoincrement())
+  name      String
+  date      DateTime
+  location  String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  entries   Entry[]
+}
+
+model Admin {
+  id           Int      @id @default(autoincrement())
+  username     String   @unique
+  passwordHash String
+  token        String   @unique
+  role         String   @default("staff")
+  createdAt    DateTime @default(now())
+} 
