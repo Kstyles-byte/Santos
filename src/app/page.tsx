@@ -147,16 +147,19 @@ const styles = StyleSheet.create({
     backgroundColor: '#222',
   },
   button: {
-    backgroundColor: Colors.dark.tint,
+    backgroundColor: '#0a7ea4',
     padding: 15,
     borderRadius: 5,
     alignItems: 'center',
     marginTop: 10,
+    width: '100%',
+    cursor: 'pointer',
   },
   buttonText: {
-    color: '#fff',
+    color: '#ffffff',
     fontWeight: 'bold',
     fontSize: 16,
+    textAlign: 'center',
   },
   successContainer: {
     alignItems: 'center',

@@ -25,9 +25,6 @@ export default function RootLayout({
           <main className="flex-grow">
             {children}
           </main>
-          <footer className="py-4 text-center text-gray-500 text-sm border-t border-gray-800">
-            © {new Date().getFullYear()} Santos Clothing. All rights reserved.
-          </footer>
         </div>
       </body>
     </html>
