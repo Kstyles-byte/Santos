@@ -98,18 +98,35 @@ export default function EntryForm() {
         </>
       ) : (
         <View style={styles.successContainer}>
-          <View style={styles.titleContainer}>
-            <ThemedText variant="heading" style={styles.successTitle}>ENTRY SUBMITTED!</ThemedText>
-            <View style={styles.titleUnderline} />
+          <View style={styles.celebrationIcon}>
+            <svg width="60" height="60" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="#0a7ea4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M8 12L11 15L16 9" stroke="#0a7ea4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
           </View>
+          
+          <View style={styles.titleContainer}>
+            <ThemedText variant="heading" style={styles.successTitle}>ENTRY CONFIRMED</ThemedText>
+            <View style={[styles.titleUnderline, styles.successUnderline]} />
+          </View>
+          
           <ThemedText style={styles.successText}>
-            Thank you for entering the Santos event draw.
+            Thank you for participating in the Santos exclusive event draw. 
+            Your entry has been successfully registered.
           </ThemedText>
+          
+          <View style={styles.infoContainer}>
+            <ThemedText style={styles.infoText}>
+              Winners will be announced at the end of the event. If selected, 
+              you'll be contacted via the phone number you provided.
+            </ThemedText>
+          </View>
+          
           <TouchableOpacity
-            style={styles.button}
+            style={[styles.button, styles.homeButton]}
             onPress={() => setSubmitted(false)}
           >
-            <ThemedText style={styles.buttonText}>ENTER AGAIN</ThemedText>
+            <ThemedText style={styles.buttonText}>GO BACK TO HOME</ThemedText>
           </TouchableOpacity>
         </View>
       )}
@@ -206,6 +223,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     width: '100%',
     maxWidth: 500,
+    padding: 20,
+  },
+  celebrationIcon: {
+    marginBottom: 30,
+    marginTop: 10,
   },
   successTitle: {
     fontFamily: "'Montserrat', sans-serif",
@@ -214,12 +236,38 @@ const styles = StyleSheet.create({
     letterSpacing: 3,
     textAlign: 'center',
     textTransform: 'uppercase',
+    color: '#ffffff',
+  },
+  successUnderline: {
+    backgroundImage: 'linear-gradient(90deg, transparent, #0a7ea4, transparent)',
+    width: '100%',
   },
   successText: {
     fontSize: 18,
-    marginBottom: 40,
+    marginBottom: 30,
     textAlign: 'center',
     lineHeight: 1.5,
     letterSpacing: 0.5,
+    color: '#ffffff',
+  },
+  infoContainer: {
+    backgroundColor: 'rgba(10, 126, 164, 0.1)',
+    borderLeft: '3px solid #0a7ea4',
+    padding: 20,
+    marginBottom: 40,
+    borderRadius: 0,
+    width: '100%',
+  },
+  infoText: {
+    fontSize: 16,
+    lineHeight: 1.6,
+    color: '#9BA1A6',
+    letterSpacing: 0.5,
+  },
+  homeButton: {
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: '#0a7ea4',
+    transition: 'all 0.3s ease',
   },
 }); 
