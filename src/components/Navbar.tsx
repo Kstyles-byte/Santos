@@ -17,6 +17,7 @@ export function Navbar() {
         onPress={() => router.push('/')}
       >
         <ThemedText style={styles.logo}>SANTOS</ThemedText>
+        <View style={styles.logoUnderline} />
       </TouchableOpacity>
 
       <View style={styles.links}>
@@ -64,11 +65,28 @@ const styles = StyleSheet.create({
   },
   logoContainer: {
     marginRight: 20,
+    position: 'relative',
+    paddingBottom: 8,
   },
   logo: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: Colors.dark.tint,
+    fontFamily: "'Montserrat', sans-serif",
+    fontSize: 28,
+    fontWeight: '700',
+    letterSpacing: 3,
+    color: '#ffffff',
+    textTransform: 'uppercase',
+  },
+  logoUnderline: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 2,
+    width: '70%',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    backgroundColor: 'transparent',
+    backgroundImage: 'linear-gradient(90deg, transparent, #0a7ea4, transparent)',
   },
   links: {
     flexDirection: 'row',
@@ -79,9 +97,12 @@ const styles = StyleSheet.create({
   linkText: {
     fontSize: 16,
     color: '#ccc',
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
+    fontWeight: '500',
   },
   activeLink: {
-    color: Colors.dark.tint,
+    color: '#ffffff',
     fontWeight: 'bold',
   },
 }); 

@@ -59,11 +59,14 @@ export default function EntryForm() {
     <ThemedView style={styles.container}>
       {!submitted ? (
         <>
-          <ThemedText variant="heading" style={styles.title}>SANTOS EVENT DRAW</ThemedText>
+          <View style={styles.titleContainer}>
+            <ThemedText variant="heading" style={styles.title}>SANTOS EVENT DRAW</ThemedText>
+            <View style={styles.titleUnderline} />
+          </View>
           <ThemedText style={styles.subtitle}>Enter for a chance to win</ThemedText>
 
           <View style={styles.form}>
-            <ThemedText>Full Name</ThemedText>
+            <ThemedText style={styles.label}>FULL NAME</ThemedText>
             <TextInput
               style={styles.input}
               value={fullName}
@@ -72,7 +75,7 @@ export default function EntryForm() {
               placeholderTextColor="#666"
             />
 
-            <ThemedText>Phone Number</ThemedText>
+            <ThemedText style={styles.label}>PHONE NUMBER</ThemedText>
             <TextInput
               style={styles.input}
               value={phoneNumber}
@@ -88,14 +91,17 @@ export default function EntryForm() {
               disabled={isSubmitting}
             >
               <ThemedText style={styles.buttonText}>
-                {isSubmitting ? 'Submitting...' : 'ENTER DRAW'}
+                {isSubmitting ? 'SUBMITTING...' : 'ENTER DRAW'}
               </ThemedText>
             </TouchableOpacity>
           </View>
         </>
       ) : (
         <View style={styles.successContainer}>
-          <ThemedText variant="heading" style={styles.successTitle}>ENTRY SUBMITTED!</ThemedText>
+          <View style={styles.titleContainer}>
+            <ThemedText variant="heading" style={styles.successTitle}>ENTRY SUBMITTED!</ThemedText>
+            <View style={styles.titleUnderline} />
+          </View>
           <ThemedText style={styles.successText}>
             Thank you for entering the Santos event draw.
           </ThemedText>
@@ -119,61 +125,101 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     minHeight: '100vh',
   },
-  title: {
-    fontSize: 32,
-    fontWeight: 'bold',
+  titleContainer: {
+    position: 'relative',
     marginBottom: 10,
+    paddingBottom: 15,
+  },
+  title: {
+    fontFamily: "'Montserrat', sans-serif",
+    fontSize: 36,
+    fontWeight: '700',
+    letterSpacing: 4,
     textAlign: 'center',
+    textTransform: 'uppercase',
+  },
+  titleUnderline: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 2,
+    width: '70%',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    backgroundColor: 'transparent',
+    backgroundImage: 'linear-gradient(90deg, transparent, #0a7ea4, transparent)',
   },
   subtitle: {
     fontSize: 18,
-    marginBottom: 30,
+    marginBottom: 40,
     textAlign: 'center',
     color: Colors.dark.icon,
+    letterSpacing: 1,
   },
   form: {
     width: '100%',
     maxWidth: 400,
+    marginTop: 10,
+  },
+  label: {
+    fontSize: 14,
+    marginBottom: 8,
+    letterSpacing: 1,
+    textTransform: 'uppercase',
+    color: '#9BA1A6',
   },
   input: {
     width: '100%',
     height: 50,
     borderWidth: 1,
     borderColor: '#333',
-    borderRadius: 5,
-    marginBottom: 20,
-    paddingHorizontal: 10,
+    borderRadius: 0,
+    marginBottom: 25,
+    paddingHorizontal: 15,
     color: Colors.dark.text,
-    backgroundColor: '#222',
+    backgroundColor: '#1A1A1A',
+    fontSize: 16,
+    letterSpacing: 0.5,
   },
   button: {
     backgroundColor: '#0a7ea4',
     padding: 15,
-    borderRadius: 5,
+    borderRadius: 0,
     alignItems: 'center',
-    marginTop: 10,
+    marginTop: 20,
     width: '100%',
     cursor: 'pointer',
+    position: 'relative',
+    overflow: 'hidden',
   },
   buttonText: {
     color: '#ffffff',
-    fontWeight: 'bold',
+    fontWeight: '700',
     fontSize: 16,
     textAlign: 'center',
+    letterSpacing: 2,
+    textTransform: 'uppercase',
   },
   successContainer: {
     alignItems: 'center',
     justifyContent: 'center',
+    width: '100%',
+    maxWidth: 500,
   },
   successTitle: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    marginBottom: 20,
+    fontFamily: "'Montserrat', sans-serif",
+    fontSize: 32,
+    fontWeight: '700',
+    letterSpacing: 3,
     textAlign: 'center',
+    textTransform: 'uppercase',
   },
   successText: {
     fontSize: 18,
-    marginBottom: 30,
+    marginBottom: 40,
     textAlign: 'center',
+    lineHeight: 1.5,
+    letterSpacing: 0.5,
   },
 }); 
