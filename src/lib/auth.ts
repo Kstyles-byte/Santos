@@ -1,14 +1,21 @@
 import { NextApiRequest } from 'next';
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from './db';
 
 export const ADMIN_TOKEN_HEADER = 'x-admin-token';
 
-export async function verifyAdminToken(request: NextRequest | NextApiRequest): Promise<boolean> {
+// This function can handle all three types of request objects
+export async function verifyAdminToken(request: Request | NextRequest | NextApiRequest): Promise<boolean> {
   // Extract token from headers
-  const token = request instanceof NextRequest 
-    ? request.headers.get(ADMIN_TOKEN_HEADER)
-    : request.headers[ADMIN_TOKEN_HEADER] as string;
+  let token: string | null | undefined;
+  
+  if (request instanceof Request || request instanceof NextRequest) {
+    // Standard Request or NextRequest (App Router)
+    token = request.headers.get(ADMIN_TOKEN_HEADER);
+  } else {
+    // NextApiRequest (Pages Router)
+    token = request.headers[ADMIN_TOKEN_HEADER] as string;
+  }
 
   if (!token) {
     return false;
@@ -28,6 +35,6 @@ export async function verifyAdminToken(request: NextRequest | NextApiRequest): P
 }
 
 // For admin route handlers
-export async function isAuthorized(request: NextRequest | NextApiRequest): Promise<boolean> {
+export async function isAuthorized(request: Request | NextRequest | NextApiRequest): Promise<boolean> {
   return verifyAdminToken(request);
 } 
