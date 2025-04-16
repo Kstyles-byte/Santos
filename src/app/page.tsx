@@ -117,8 +117,10 @@ export default function EntryForm() {
           
           <View style={styles.infoContainer}>
             <ThemedText style={styles.infoText}>
-              Winners will be announced at the end of the event. If selected, 
-              you'll be contacted via the phone number you provided.
+              Winners will be announced at the end of the event.
+            </ThemedText>
+            <ThemedText style={styles.infoText}>
+              If selected, you'll be contacted via the phone number you provided.
             </ThemedText>
           </View>
           
@@ -257,12 +259,17 @@ const styles = StyleSheet.create({
     marginBottom: 40,
     borderRadius: 0,
     width: '100%',
+    maxWidth: '100%',
   },
   infoText: {
-    fontSize: 16,
-    lineHeight: 1.6,
+    fontSize: 14,
+    lineHeight: 1.8,
     color: '#9BA1A6',
     letterSpacing: 0.5,
+    marginBottom: 8,
+    textAlign: 'left',
+    width: '100%',
+    wordWrap: 'break-word',
   },
   homeButton: {
     backgroundColor: 'transparent',
