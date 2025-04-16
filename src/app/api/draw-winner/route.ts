@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { isAuthorized } from '@/lib/auth';
+import { Prisma } from '@prisma/client';
 
 // POST /api/draw-winner - Select a random winner
 export async function POST(request: Request) {
@@ -19,13 +20,26 @@ export async function POST(request: Request) {
     
     // Randomly select a winner using SQL RANDOM() function
     // Exclude entries that are already winners
-    const winner = await prisma.$queryRaw`
-      SELECT * FROM "Entry"
-      WHERE "isWinner" = false
-      ${eventId ? prisma.$raw`AND "eventId" = ${parseInt(eventId)}` : prisma.$raw``}
-      ORDER BY RANDOM()
-      LIMIT 1
-    `;
+    let winner;
+    
+    if (eventId) {
+      // With event filter
+      winner = await prisma.$queryRaw`
+        SELECT * FROM "Entry"
+        WHERE "isWinner" = false
+        AND "eventId" = ${parseInt(eventId)}
+        ORDER BY RANDOM()
+        LIMIT 1
+      `;
+    } else {
+      // Without event filter
+      winner = await prisma.$queryRaw`
+        SELECT * FROM "Entry"
+        WHERE "isWinner" = false
+        ORDER BY RANDOM()
+        LIMIT 1
+      `;
+    }
 
     if (!winner || !Array.isArray(winner) || winner.length === 0) {
       return NextResponse.json(
