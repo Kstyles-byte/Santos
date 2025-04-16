@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Entry } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
@@ -50,7 +50,7 @@ async function seedEntries() {
   
   // Generate 50 test entries
   const numEntries = 50;
-  const createdEntries = [];
+  const createdEntries: Entry[] = []; // Explicitly type the array as Entry[]
   
   for (let i = 0; i < numEntries; i++) {
     const entry = await prisma.entry.create({
