@@ -6,6 +6,7 @@ import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedSwitch } from '@/components/ThemedSwitch';
 import { Colors } from '@/constants/Colors';
+import { useDatabaseCheck } from './check-db';
 
 interface Entry {
   id: number;
@@ -38,6 +39,9 @@ export default function AdminDashboard() {
   const [siteLockMessage, setSiteLockMessage] = useState('');
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [includingWinners, setIncludingWinners] = useState(false);
+
+  // Use the database check utility
+  useDatabaseCheck();
 
   // Login function
   const handleLogin = async () => {
@@ -148,13 +152,20 @@ export default function AdminDashboard() {
   const fetchSiteStatus = async () => {
     if (!isAuthenticated) return;
     
+    console.log('Fetching site status...');
     try {
       const response = await fetch('/api/site-status');
+      console.log('Site status response status:', response.status);
+      
       const data = await response.json();
+      console.log('Site status response data:', data);
       
       if (response.ok && data.status) {
         setSiteStatus(data.status);
-        setSiteLockMessage(data.status.message);
+        setSiteLockMessage(data.status.message || '');
+        console.log('Updated site status state:', data.status);
+      } else {
+        console.error('Error in site status response:', data.error || 'Unknown error');
       }
     } catch (err) {
       console.error('Error fetching site status:', err);
@@ -165,9 +176,11 @@ export default function AdminDashboard() {
   const toggleSiteLock = async () => {
     if (!isAuthenticated || !siteStatus) return;
     
+    console.log('Toggling site lock. Current status:', siteStatus);
     setIsLoading(true);
     try {
       const newLockStatus = !siteStatus.isLocked;
+      console.log('Setting lock status to:', newLockStatus);
       
       const response = await fetch('/api/site-status', {
         method: 'POST',
@@ -181,16 +194,19 @@ export default function AdminDashboard() {
         }),
       });
       
+      console.log('Response status:', response.status);
+      const data = await response.json();
+      console.log('Response data:', data);
+      
       if (response.ok) {
-        const data = await response.json();
         setSiteStatus(data.status);
         alert(`Site is now ${newLockStatus ? 'locked' : 'unlocked'}`);
       } else {
-        throw new Error('Failed to update site status');
+        throw new Error(`Failed to update site status: ${data.error || 'Unknown error'}`);
       }
     } catch (err) {
       console.error('Error updating site lock status:', err);
-      alert('Failed to update site lock status');
+      alert('Failed to update site lock status: ' + (err instanceof Error ? err.message : String(err)));
     } finally {
       setIsLoading(false);
     }
@@ -237,11 +253,43 @@ export default function AdminDashboard() {
     }
   }, []);
 
-  // Fetch entries when authenticated
+  // Add function to initialize the database
+  const initializeDatabase = async () => {
+    if (!isAuthenticated) return;
+    
+    console.log('Initializing database...');
+    try {
+      const response = await fetch('/api/init-db', {
+        method: 'POST',
+        headers: {
+          'x-admin-token': token,
+        },
+      });
+      
+      console.log('Database initialization response status:', response.status);
+      
+      const data = await response.json();
+      console.log('Database initialization response data:', data);
+      
+      if (response.ok && data.status) {
+        setSiteStatus(data.status);
+        setSiteLockMessage(data.status.message || '');
+        console.log('Updated site status state from initialization:', data.status);
+      }
+    } catch (err) {
+      console.error('Error initializing database:', err);
+    }
+  };
+  
+  // Update useEffect for authentication
   useEffect(() => {
     if (isAuthenticated) {
-      fetchEntries();
-      fetchSiteStatus();
+      // First initialize the database to ensure tables exist
+      initializeDatabase().then(() => {
+        // Then fetch entries and site status
+        fetchEntries();
+        fetchSiteStatus();
+      });
     }
   }, [isAuthenticated]);
 
@@ -432,7 +480,7 @@ export default function AdminDashboard() {
         <View style={styles.confirmContainer}>
           <ThemedText variant="heading" style={styles.confirmTitle}>Confirm Clear</ThemedText>
           <ThemedText style={styles.confirmText}>
-            Are you sure you want to clear entries? This cannot be undone.
+            Are you sure you want to clear entries?.
           </ThemedText>
           
           <View style={styles.includeWinnersRow}>
