@@ -1,18 +1,53 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, TextInput, StyleSheet, TouchableOpacity } from 'react-native-web';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { Colors } from '@/constants/Colors';
+
+interface SiteStatus {
+  id: number;
+  isLocked: boolean;
+  message: string;
+  updatedAt: string;
+}
 
 export default function EntryForm() {
   const [fullName, setFullName] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [siteStatus, setSiteStatus] = useState<SiteStatus | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Fetch site status on component mount
+  useEffect(() => {
+    const fetchSiteStatus = async () => {
+      try {
+        setIsLoading(true);
+        const response = await fetch('/api/site-status');
+        const data = await response.json();
+        if (response.ok && data.status) {
+          setSiteStatus(data.status);
+        }
+      } catch (error) {
+        console.error('Error fetching site status:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchSiteStatus();
+  }, []);
 
   const handleSubmit = async () => {
+    // Check if site is locked
+    if (siteStatus?.isLocked) {
+      alert('The event draw has ended. No new entries can be submitted.');
+      return;
+    }
+
     // Basic validation
     if (!fullName.trim()) {
       alert('Please enter your full name');
@@ -54,6 +89,41 @@ export default function EntryForm() {
       setIsSubmitting(false);
     }
   };
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <ThemedView style={styles.container}>
+        <ThemedText style={styles.loadingText}>Loading...</ThemedText>
+      </ThemedView>
+    );
+  }
+
+  // Show locked site message
+  if (siteStatus?.isLocked) {
+    return (
+      <ThemedView style={styles.container}>
+        <View style={styles.lockedContainer}>
+          <View style={styles.celebrationIcon}>
+            <svg width="60" height="60" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M18 8L22 12L18 16" stroke="#0a7ea4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M6 8L2 12L6 16" stroke="#0a7ea4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M14 4L10 20" stroke="#0a7ea4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </View>
+          
+          <View style={styles.titleContainer}>
+            <ThemedText variant="heading" style={styles.successTitle}>DRAW ENDED</ThemedText>
+            <View style={[styles.titleUnderline, styles.successUnderline]} />
+          </View>
+          
+          <ThemedText style={styles.successText}>
+            {siteStatus.message}
+          </ThemedText>
+        </View>
+      </ThemedView>
+    );
+  }
 
   return (
     <ThemedView style={styles.container}>
@@ -248,6 +318,18 @@ const styles = StyleSheet.create({
     width: '100%',
     maxWidth: 500,
     padding: 20,
+  },
+  lockedContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
+    maxWidth: 500,
+    padding: 20,
+  },
+  loadingText: {
+    fontSize: 18,
+    letterSpacing: 1,
+    marginBottom: 20,
   },
   celebrationIcon: {
     marginBottom: 30,

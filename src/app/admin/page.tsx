@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, TouchableOpacity, ScrollView, TextInput } from 'react-native-web';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
+import { ThemedSwitch } from '@/components/ThemedSwitch';
 import { Colors } from '@/constants/Colors';
 
 interface Entry {
@@ -15,6 +16,14 @@ interface Entry {
   drawTimestamp: string | null;
 }
 
+// Add the SiteStatus interface
+interface SiteStatus {
+  id: number;
+  isLocked: boolean;
+  message: string;
+  updatedAt: string;
+}
+
 export default function AdminDashboard() {
   const [entries, setEntries] = useState<Entry[]>([]);
   const [token, setToken] = useState('');
@@ -23,6 +32,12 @@ export default function AdminDashboard() {
   const [error, setError] = useState('');
   const [winner, setWinner] = useState<Entry | null>(null);
   const [showWinnerAnimation, setShowWinnerAnimation] = useState(false);
+  
+  // Add these new state variables
+  const [siteStatus, setSiteStatus] = useState<SiteStatus | null>(null);
+  const [siteLockMessage, setSiteLockMessage] = useState('');
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
+  const [includingWinners, setIncludingWinners] = useState(false);
 
   // Login function
   const handleLogin = async () => {
@@ -129,6 +144,88 @@ export default function AdminDashboard() {
     }
   };
 
+  // Add fetchSiteStatus function
+  const fetchSiteStatus = async () => {
+    if (!isAuthenticated) return;
+    
+    try {
+      const response = await fetch('/api/site-status');
+      const data = await response.json();
+      
+      if (response.ok && data.status) {
+        setSiteStatus(data.status);
+        setSiteLockMessage(data.status.message);
+      }
+    } catch (err) {
+      console.error('Error fetching site status:', err);
+    }
+  };
+  
+  // Add toggleSiteLock function
+  const toggleSiteLock = async () => {
+    if (!isAuthenticated || !siteStatus) return;
+    
+    setIsLoading(true);
+    try {
+      const newLockStatus = !siteStatus.isLocked;
+      
+      const response = await fetch('/api/site-status', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-admin-token': token,
+        },
+        body: JSON.stringify({
+          isLocked: newLockStatus,
+          message: siteLockMessage,
+        }),
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setSiteStatus(data.status);
+        alert(`Site is now ${newLockStatus ? 'locked' : 'unlocked'}`);
+      } else {
+        throw new Error('Failed to update site status');
+      }
+    } catch (err) {
+      console.error('Error updating site lock status:', err);
+      alert('Failed to update site lock status');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  // Add handleClearEntries function
+  const handleClearEntries = async () => {
+    if (!isAuthenticated) return;
+    
+    setIsLoading(true);
+    try {
+      const response = await fetch(`/api/clear-entries?clearWinners=${includingWinners}`, {
+        method: 'POST',
+        headers: {
+          'x-admin-token': token,
+        },
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        alert(data.message);
+        // Refresh entries list
+        fetchEntries();
+      } else {
+        throw new Error('Failed to clear entries');
+      }
+    } catch (err) {
+      console.error('Error clearing entries:', err);
+      alert('Failed to clear entries');
+    } finally {
+      setIsLoading(false);
+      setShowClearConfirm(false);
+    }
+  };
+
   // Check for saved token on component mount
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -144,6 +241,7 @@ export default function AdminDashboard() {
   useEffect(() => {
     if (isAuthenticated) {
       fetchEntries();
+      fetchSiteStatus();
     }
   }, [isAuthenticated]);
 
@@ -204,6 +302,69 @@ export default function AdminDashboard() {
         </TouchableOpacity>
       </View>
 
+      {/* Add site lock controls */}
+      <View style={styles.siteControls}>
+        <View style={styles.siteLockControl}>
+          <ThemedText style={styles.controlLabel}>Site Lock Status:</ThemedText>
+          <View style={styles.switchContainer}>
+            <ThemedText style={styles.switchLabel}>
+              {siteStatus?.isLocked ? 'Locked' : 'Open'}
+            </ThemedText>
+            <ThemedSwitch
+              value={siteStatus?.isLocked || false}
+              onValueChange={toggleSiteLock}
+              trackColor={{ false: '#333', true: '#0a7ea4' }}
+              thumbColor="#fff"
+              style={styles.switch}
+              disabled={isLoading}
+            />
+          </View>
+        </View>
+        
+        {siteStatus?.isLocked && (
+          <View style={styles.messageControl}>
+            <ThemedText style={styles.controlLabel}>Lock Message:</ThemedText>
+            <TextInput
+              style={styles.messageInput}
+              value={siteLockMessage}
+              onChangeText={setSiteLockMessage}
+              placeholder="Message to display when site is locked"
+              placeholderTextColor="#666"
+              multiline
+            />
+            <TouchableOpacity
+              style={[styles.button, styles.updateButton]}
+              onPress={async () => {
+                if (!isAuthenticated || !siteStatus) return;
+                
+                try {
+                  const response = await fetch('/api/site-status', {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                      'x-admin-token': token,
+                    },
+                    body: JSON.stringify({
+                      message: siteLockMessage,
+                    }),
+                  });
+                  
+                  if (response.ok) {
+                    const data = await response.json();
+                    setSiteStatus(data.status);
+                    alert('Message updated');
+                  }
+                } catch (err) {
+                  console.error('Error updating lock message:', err);
+                }
+              }}
+            >
+              <ThemedText style={styles.buttonText}>Update Message</ThemedText>
+            </TouchableOpacity>
+          </View>
+        )}
+      </View>
+
       <View style={styles.controls}>
         <TouchableOpacity
           style={styles.drawButton}
@@ -232,6 +393,19 @@ export default function AdminDashboard() {
         </View>
       </View>
 
+      {/* Add clear entries button */}
+      <View style={styles.clearControl}>
+        <TouchableOpacity
+          style={styles.clearButton}
+          onPress={() => setShowClearConfirm(true)}
+          disabled={isLoading || entries.length === 0}
+        >
+          <ThemedText style={styles.buttonText}>
+            CLEAR ENTRIES
+          </ThemedText>
+        </TouchableOpacity>
+      </View>
+
       {winner && (
         <View style={styles.winnerContainer}>
           <ThemedText variant="heading" style={styles.winnerTitle}>WINNER!</ThemedText>
@@ -252,6 +426,42 @@ export default function AdminDashboard() {
           {/* You could add a more complex animation here */}
         </View>
       ) : null}
+
+      {/* Add confirmation dialog for clearing entries */}
+      {showClearConfirm && (
+        <View style={styles.confirmContainer}>
+          <ThemedText variant="heading" style={styles.confirmTitle}>Confirm Clear</ThemedText>
+          <ThemedText style={styles.confirmText}>
+            Are you sure you want to clear entries? This cannot be undone.
+          </ThemedText>
+          
+          <View style={styles.includeWinnersRow}>
+            <ThemedText>Include winners?</ThemedText>
+            <ThemedSwitch
+              value={includingWinners}
+              onValueChange={setIncludingWinners}
+              trackColor={{ false: '#333', true: '#e74c3c' }}
+              thumbColor="#fff"
+            />
+          </View>
+          
+          <View style={styles.confirmButtons}>
+            <TouchableOpacity
+              style={[styles.button, styles.cancelButton]}
+              onPress={() => setShowClearConfirm(false)}
+            >
+              <ThemedText style={styles.buttonText}>Cancel</ThemedText>
+            </TouchableOpacity>
+            
+            <TouchableOpacity
+              style={[styles.button, styles.confirmButton]}
+              onPress={handleClearEntries}
+            >
+              <ThemedText style={styles.buttonText}>Confirm Clear</ThemedText>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
 
       <ScrollView style={styles.entriesContainer}>
         <ThemedText variant="subheading">
@@ -439,5 +649,109 @@ const styles = StyleSheet.create({
     zIndex: 10,
     alignItems: 'center',
     width: 300,
+  },
+  siteControls: {
+    marginBottom: 30,
+    padding: 15,
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    borderRadius: 5,
+    borderWidth: 1,
+    borderColor: '#333',
+  },
+  siteLockControl: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 15,
+  },
+  messageControl: {
+    marginTop: 10,
+  },
+  switchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  switch: {
+    marginLeft: 10,
+  },
+  switchLabel: {
+    marginRight: 10,
+    color: Colors.dark.icon,
+  },
+  controlLabel: {
+    marginBottom: 5,
+    fontWeight: 'bold',
+    color: Colors.dark.tint,
+  },
+  messageInput: {
+    width: '100%',
+    borderWidth: 1,
+    borderColor: '#333',
+    borderRadius: 5,
+    marginBottom: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    color: Colors.dark.text,
+    backgroundColor: '#222',
+    minHeight: 60,
+  },
+  clearControl: {
+    marginBottom: 20,
+  },
+  clearButton: {
+    backgroundColor: '#e74c3c',
+    padding: 15,
+    borderRadius: 5,
+    alignItems: 'center',
+    width: '100%',
+  },
+  updateButton: {
+    backgroundColor: '#2ecc71',
+    marginTop: 5,
+  },
+  confirmContainer: {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: [{ translateX: -175 }, { translateY: -125 }],
+    backgroundColor: 'rgba(0, 0, 0, 0.95)',
+    padding: 20,
+    borderRadius: 10,
+    zIndex: 10,
+    alignItems: 'center',
+    width: 350,
+    borderWidth: 2,
+    borderColor: '#e74c3c',
+  },
+  confirmTitle: {
+    color: '#e74c3c',
+    marginBottom: 15,
+  },
+  confirmText: {
+    marginBottom: 20,
+    textAlign: 'center',
+    lineHeight: 1.5,
+  },
+  includeWinnersRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '100%',
+    marginBottom: 20,
+  },
+  confirmButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+  },
+  cancelButton: {
+    backgroundColor: '#666',
+    flex: 1,
+    marginRight: 5,
+  },
+  confirmButton: {
+    backgroundColor: '#e74c3c',
+    flex: 1,
+    marginLeft: 5,
   },
 }); 
